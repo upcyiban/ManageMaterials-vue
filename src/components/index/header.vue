@@ -9,21 +9,20 @@
 		      </button>
         </div>
       </div>
-      <div class="menu-container" :class="isMenuOpen > 0?OpenMenu : CloseMenu">
+      <div class="menu-container" :class="isMenuOpen == 0?CloseMenu : OpenMenu">
         <ul>
-          <li>
+          <li @click="menuController">
             <router-link to="/">主页</router-link>
           </li>
-          <li>
+          <li @click="menuController">
             <router-link to="/user">我的</router-link>
           </li>
-          <li>
+          <li @click="menuController">
             <router-link to="/manager">管理</router-link>
           </li>
         </ul>
       </div>
     </div>
-    
   </div>
 </template>
 
@@ -33,50 +32,56 @@ export default {
 	data() {
     return {
 			isMenuOpen: 1,
-      OpenMenu: 'OpenMenu',
+      OpenMenu: '',
       CloseMenu: 'CloseMenu',
     };
 	},
 	methods: {
 		menuController() {
-      if (this.isMenuOpen == 0) {
-        this.isMenuOpen = 1
-      } else if (this.isMenuOpen == 1) {
-        this.isMenuOpen = 0
+      if (document.body.clientWidth < 768) {
+        if (this.isMenuOpen == -1) {
+          this.OpenMenu = 'OpenMenu'
+          this.isMenuOpen = 1
+        }
+        else if (this.isMenuOpen == 0) {
+          this.isMenuOpen = 1
+        } else if (this.isMenuOpen == 1) {
+          this.isMenuOpen = 0
+        }
+        console.log(this.isMenuOpen)
       }
-		}
+    }
   },
-  created() {
+  created () {
     if (document.body.clientWidth < 768) {
-      this.isMenuOpen = 0
-      console.log(document.body.clientWidth)
-    } else {
+      this.isMenuOpen = -1
+    } else if (document.body.clientWidth >= 768) {
       this.isMenuOpen = 1
-      console.log(document.body.clientWidth)
+      console.log(this.isMenuOpen)
     }
   }
 }
 </script>
 
-<style>
+<style scoped>
   .header {
     width: 100%;
-    min-height: 2rem;
-    margin-bottom: 0.2rem;
+    min-height: 3rem;
+    margin-bottom: 0.6rem;
   }
 
   .main-container {
-    min-height: 2rem;
+    min-height: 3rem;
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
     border: 1px solid #e5e5e5;
     background: rgb(248,248,248);
   }
 
   .navbar-header-container {
-    width: 20%;
+    width: 15%;
   }
 
   .navbar-header {
@@ -99,7 +104,7 @@ export default {
 
   .menu-container {
     height: 2rem;
-    width: 80%;
+    width: 40%;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -109,6 +114,7 @@ export default {
   }
 
   .menu-container ul {
+    height: 100%;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -118,7 +124,17 @@ export default {
 
   .menu-container li {
     margin-left: 2rem;
-    font-size: 0.8rem;
+    font-size: 1rem;
+    height: 100%;
+  }
+
+  .menu-container a {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
   }
 
   .OpenMenu {
@@ -133,11 +149,11 @@ export default {
 
 	@keyframes openMenu {
 		0% {height: 0;}
-    100% {height: 4rem;}
+    100% {height: 6rem;}
 	}
 
 	@keyframes closeMenu {
-		0% {height: 4rem;}
+		0% {height: 6rem;}
     100% {height: 0;}
 	}
 
@@ -155,7 +171,7 @@ export default {
     }
 
     .navbar-header {
-      height: 2rem;
+      height: 3rem;
       width: 100%;
       display: flex;
       flex-direction: row;
@@ -167,17 +183,17 @@ export default {
     .menu-button {
       display: block;
       margin-right: 0.5rem;
-      height: 1.4rem;
-      width: 1.8rem;
-      font-size: 1.1rem;
+      height: 1.8rem;
+      width: 2.2rem;
+      font-size: 1.4rem;
       color: #777;
       outline: none;
-      border: none;
       border: 1px solid #e5e5e5;
       background: rgb(248,248,248); 
 	  }
 
     .menu-container {
+      height: 0;
       width: 100%;
       border-top: 1px solid #e5e5e5;
     }
@@ -195,14 +211,20 @@ export default {
     }
 
     .menu-container li {
+      height: 33.33%;
       width: 100%;
       margin-left: 1rem;
-      font-size: 0.6rem;
+      font-size: 0.8rem;
     }
 
-    li a {
+    a {
+      height: 100%;
       width: 100%;
       display: block;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start !important;
     }
   }
 
