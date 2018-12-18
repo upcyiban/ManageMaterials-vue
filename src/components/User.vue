@@ -5,16 +5,16 @@
         <span>所有物资</span>
         <div>(PS：默认按结束时间排序)</div>
         <div>搜索：</div>
-        <input type="text">
+        <input type="text" v-model="search">
       </div>
       <div class="index-body">
         <div class="index-table">
           <div class="table-header">
-            <div class="materialname">名称</div>
-            <div class="department">所属单位</div>
-            <div class="start-time">开始时间</div>
-            <div class="end-time">结束时间</div>
-            <div class="status">状态</div>
+            <div class="materialname" @click="sortID(0)">名称</div>
+            <div class="department" @click="sortID(10)">所属单位</div>
+            <div class="start-time" @click="sortID(20)">开始时间</div>
+            <div class="end-time" @click="sortID(30)">结束时间</div>
+            <div class="status"  @click="sortID(40)">状态</div>
           </div>
           <div class="table-body">
             <div class="materialname table-column">
@@ -55,7 +55,11 @@ export default {
     return {
       greenbutton: "greenbutton",
       graybutton: "graybutton",
-      materials: []
+      materials: [],
+      materialsINFO: [],
+      searchINFO: [],
+      search: "",
+      sortWay: 0
     };
   },
   methods: {
@@ -69,6 +73,17 @@ export default {
         .then(rsp => {
           console.log(rsp);
         });
+    },
+    sortID (val) {
+      if (parseInt(this.sortWay/10) != val/10 + 1) {
+        this.sortWay = 11 + val
+      } else {
+        this.sortWay ++
+        if (this.sortWay%10 == 3) {
+          this.sortWay -= 2
+        }
+      }
+      console.log(this.sortWay)
     }
   },
   created() {
@@ -95,25 +110,87 @@ export default {
         this.$axios
           .get("http://yb.upc.edu.cn:8087/material/borrower")
           .then(response => {
-            console.log(response.data);
-            this.materials = response.data;
+            console.log(response.data)
+            this.materials = response.data
+            this.materialsINFO = response.data
+            this.searchINFO = response.data
             for (var i = 0; i < response.data.length; i++) {
               this.materials[i].startTime = this.$timetrans(response.data[i].startTime)
               this.materials[i].endTime = this.$timetrans(response.data[i].endTime)
               if (response.data[i].isAgree == 0) {
                 this.materials[i].status = "申请中";
+                this.materialsINFO[i].status = "申请中";
+                this.searchINFO[i].status = "申请中";
               } else if (response.data[i].isAgree == -1) {
                 this.materials[i].status = "申请失败";
+                this.materialsINFO[i].status = "申请失败";
+                this.searchINFO[i].status = "申请失败";
               } else {
                 this.materials[i].status = "借出中";
+                this.materialsINFO[i].status = "借出中";
+                this.searchINFO[i].status = "借出中";
               }
               if (response.data[i].return) {
                 this.materials[i].status = "已归还";
+                this.materialsINFO[i].status = "已归还";
+                this.searchINFO[i].status = "已归还";
               }
             }
             this.materials.sort(this.$compare('endTime'))
+            this.materialsINFO.sort(this.$compare('endTime'))
           });
       });
+    }
+  },
+  watch: {
+    search: {
+      handler: function(val, oldval) {
+        if (val != '') {
+          let _this = this
+          var materials = this.materialsINFO;
+          this.materials = []
+          console.log(val)
+          var i = 0
+          Object.keys(materials).forEach(function(key) {
+            let material = _this.materialsINFO[key]
+            var str = JSON.stringify(material)
+            console.log(str)
+            console.log(str.indexOf(val))
+            if (str.indexOf(val) != -1) {
+              _this.materials[i] = material
+              i++
+            }
+          })
+          console.log(this.materials)
+        } else if (val == '') {
+          this.materials = this.materialsINFO
+        }
+      }
+    },
+    sortWay: {
+      handler: function(val, oldval) {
+        let sortName = ''
+        console.log('213')
+        let _this = this
+        if (parseInt(val/10) == 1) {
+          sortName = 'materialName'
+        } else if (parseInt(val/10) == 2) {
+          sortName = 'materialOrganization'
+        } else if (parseInt(val/10) == 3) {
+          sortName = 'startTime'
+        } else if (parseInt(val/10) == 4) {
+          sortName = 'endTime'
+        } else if (parseInt(val/10) == 4) {
+          sortName = 'number'
+        } else if (parseInt(val/10) == 5) {
+          sortName = 'isAgree'
+        }
+        if (val%10 == 1) {
+          this.materials.sort(this.$ordercompare(sortName))
+        } else if (val%10 == 2) {
+          this.materials.sort(this.$compare(sortName))
+        }
+      }
     }
   }
 };

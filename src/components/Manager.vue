@@ -3,13 +3,18 @@
     <div class="index">
       <div class="index-header">
         <span>所有物资</span>
+        <div>(PS：点击标题排序，默认按名称排序)</div>
         <div>搜索：</div>
-        <input type="text">
+        <input type="text" v-model="search">
       </div>
       <div class="index-body">
         <div class="index-table">
           <div class="table-header">
-            <div class="materialname">名称</div><div class="department">所属单位</div><div class="detail">简介</div><div class="number">可借</div><div class="borrow">删除</div>
+            <div class="materialname" @click="sortID(0)">名称</div>
+            <div class="department" @click="sortID(10)">所属单位</div>
+            <div class="detail" @click="sortID(20)">简介</div>
+            <div class="number" @click="sortID(30)">可借</div>
+            <div class="borrow">删除</div>
           </div>
           <div class="table-body">
             <div class="materialname table-column">
@@ -79,7 +84,7 @@
         <span>所有物资</span>
         <div>(PS：按归还时间排序,未做分页处理请及时删除无用数据)</div>
         <div>搜索：</div>
-        <input type="text">
+        <input type="text" v-model="search1">
       </div>
       <div class="index-body">
         <div class="index-table1">
@@ -140,12 +145,17 @@ export default {
 			graybutton: 'graybutton',
 			isAdding: false,
 			materials:[],
-			borrowMaterials: [],
+      borrowMaterials: [],
+      materialsINFO: [],
+      materialsINFO1: [],
+      searchINFO: [],
+      search: '',
+      search1: '',
 			newName: '',
 			newOrganization: '',
 			newDescription: '',
 			newTotalNumber: '',
-			sortways: 1
+			sortWay: 0
     }
   },
   methods: {
@@ -189,7 +199,7 @@ export default {
         if(response.data.code == 1){
           alert("删除成功");
           _this.$router.push('/');
-        }else{
+        } else{
           alert('删除失败');
         }
       })
@@ -198,7 +208,18 @@ export default {
 			var str = JSON.stringify(material)
 			sessionStorage.setItem('borrowDetail', str)
 			this.$router.push('/detail');
-		}
+		},
+    sortID (val) {
+      if (parseInt(this.sortWay/10) != val/10 + 1) {
+        this.sortWay = 11 + val
+      } else {
+        this.sortWay ++
+        if (this.sortWay%10 == 3) {
+          this.sortWay -= 2
+        }
+      }
+      console.log(this.sortWay)
+    }
   },
   created () {
 		let _this = this
@@ -221,6 +242,8 @@ export default {
 				this.$axios.get('http://yb.upc.edu.cn:8087/material').then(rsp=>{
           console.log(rsp.data)
           this.materials = rsp.data
+          this.materialsINFO = rsp.data
+          this.searchINFO = rsp.data
         })
 				this.$axios.get('http://yb.upc.edu.cn:8087/material/auth', {
           params: {
@@ -229,7 +252,7 @@ export default {
         })
         this.$axios.get('http://yb.upc.edu.cn:8087/material/official').then(response=>{
 					console.log(response.data)
-					this.borrowMaterials = response.data
+          this.borrowMaterials = response.data
 					for (var i = 0; i < response.data.length; i++) {
             this.borrowMaterials[i].startTime = _this.$timetrans(response.data[i].startTime)
             this.borrowMaterials[i].endTime = _this.$timetrans(response.data[i].endTime)
@@ -244,12 +267,85 @@ export default {
               this.borrowMaterials[i].status = "已归还";
             }
 					}
-					this.borrowMaterials.sort(this.$compare('endTime'))
+          this.borrowMaterials.sort(this.$inordercompare('endTime'))
+          this.materialsINFO1 = this.borrowMaterials
 					console.log(this.borrowMaterials)
         })
       })
     }
-	}
+	},
+  watch: {
+    search1: {
+      handler: function(val, oldval) {
+        if (val != '') {
+          let _this = this
+          var materials = this.materialsINFO1;
+          this.borrowMaterials = []
+          console.log(val)
+          var i = 0
+          Object.keys(materials).forEach(function(key) {
+            let material = _this.materialsINFO1[key]
+            var str = JSON.stringify(material)
+            console.log(str)
+            console.log(str.indexOf(val))
+            if (str.indexOf(val) != -1) {
+              _this.borrowMaterials[i] = material
+              i++
+            }
+          })
+          console.log(this.borrowMaterials)
+        } else if (val == '') {
+          this.borrowMaterials = this.materialsINFO1
+        }
+      }
+    },
+    search: {
+      handler: function(val, oldval) {
+        if (val != '') {
+          let _this = this
+          var materials = this.materialsINFO;
+          this.materials = []
+          this.searchINFO = []
+          console.log(val)
+          var i = 0
+          Object.keys(materials).forEach(function(key) {
+            let material = _this.materialsINFO[key]
+            var str = JSON.stringify(material)
+            console.log(str)
+            console.log(str.indexOf(val))
+            if (str.indexOf(val) != -1) {
+              _this.materials[i] = material
+              _this.searchINFO[i] = material
+              i++
+            }
+          })
+          console.log(this.materials)
+        } else if (val == '') {
+          this.materials = this.materialsINFO
+          this.searchINFO = this.materialsINFO
+        }
+      }
+    },
+    sortWay: {
+      handler: function(val, oldval) {
+        let sortName = ''
+        if (parseInt(val/10) == 1) {
+          sortName = 'name'
+        } else if (parseInt(val/10) == 2) {
+          sortName = 'organization'
+        } else if (parseInt(val/10) == 3) {
+          sortName = 'description'
+        } else if (parseInt(val/10) == 4) {
+          sortName = 'number'
+        }
+        if (val%10 == 1) {
+          this.materials.sort(this.$ordercompare(sortName))
+        } else if (val%10 == 2) {
+          this.materials.sort(this.$compare(sortName))
+        }
+      }
+    }
+  }
 }
 </script>
 
@@ -438,6 +534,7 @@ export default {
     font-weight: normal;
     text-indent:10px;
     border-top: #ddd 1px solid;
+    border-bottom: #ddd 1px solid;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -451,6 +548,7 @@ export default {
     font-weight: normal;
     text-indent:10px;
     border-top: #ddd 1px solid;
+    border-bottom: #ddd 1px solid;
     display: flex;
     flex-direction: row;
     align-items: center;

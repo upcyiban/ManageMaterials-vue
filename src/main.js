@@ -54,6 +54,56 @@ Vue.prototype.$compare = function (prop) {
     }
   }
 },
+//逆序排列
+Vue.prototype.$inordercompare = function (prop) {
+  return function (obj1, obj2){
+    //如果两个参数均为字符串类型
+    var param1 = obj1[prop]
+    var param2 = obj2[prop]
+    if(typeof param1 == "string" && typeof param2 == "string"){
+        return param2.localeCompare(param1);
+    }
+    //如果参数1为数字，参数2为字符串
+    if(typeof param1 == "number" && typeof param2 == "string"){
+        return -1;
+    }
+    //如果参数1为字符串，参数2为数字
+    if(typeof param1 == "string" && typeof param2 == "number"){
+        return 1;
+    }
+    //如果两个参数均为数字
+    if(typeof param1 == "number" && typeof param2 == "number"){
+        if(param1 > param2) {return 1;}
+        if(param1 == param2) {return 0;}
+        if(param1 < param2) {return -1;}
+    }
+  }
+}
+//顺序排列
+Vue.prototype.$ordercompare = function (prop) {
+  return function (obj1, obj2){
+    //如果两个参数均为字符串类型
+    var param1 = obj1[prop]
+    var param2 = obj2[prop]
+    if(typeof param1 == "string" && typeof param2 == "string"){
+        return param1.localeCompare(param2);
+    }
+    //如果参数1为数字，参数2为字符串
+    if(typeof param1 == "number" && typeof param2 == "string"){
+        return -1;
+    }
+    //如果参数1为字符串，参数2为数字
+    if(typeof param1 == "string" && typeof param2 == "number"){
+        return 1;
+    }
+    //如果两个参数均为数字
+    if(typeof param1 == "number" && typeof param2 == "number"){
+        if(param1 > param2) {return 1;}
+        if(param1 == param2) {return 0;}
+        if(param1 < param2) {return -1;}
+    }
+  }
+}
 
 /* eslint-disable no-new */
 new Vue({
