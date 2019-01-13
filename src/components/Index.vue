@@ -111,8 +111,9 @@ export default {
     var verify_request = this.$GetQueryString("verify_request")
     var yb_uid = this.$GetQueryString("yb_uid")
     sessionStorage.setItem("verify_request", verify_request)
-    var APPID = "f87c99a7211f2a44"
-    var CALLBACK = "http://f.yiban.cn/iapp96401"
+    console.log(verify_request)
+    var APPID = 'f87c99a7211f2a44' //"1d66daf29ef9c66f"  //f87c99a7211f2a44
+    var CALLBACK = 'http://f.yiban.cn/iapp96401' //"http://f.yiban.cn/iapp221189"  //http://f.yiban.cn/iapp96401
     if (
       verify_request == -1 ||
       verify_request == "" ||
@@ -123,7 +124,7 @@ export default {
         APPID +
         "&redirect_uri=" +
         CALLBACK +
-        "&display=html"
+        "&state=5050"
     } else {
       this.$axios.get("http://yb.upc.edu.cn:8087/material/isauth").then(rsp => {
         console.log(rsp)

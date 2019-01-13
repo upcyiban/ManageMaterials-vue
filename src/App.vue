@@ -17,7 +17,7 @@ export default {
     Footer: Footer
   },
   created() {
-
+    document.title = '物资借用'
   }
 }
 </script>

@@ -205,7 +205,8 @@ export default {
       })
 		},
 		toDetail (material) {
-			var str = JSON.stringify(material)
+      var str = JSON.stringify(material)
+      console.log(material)
 			sessionStorage.setItem('borrowDetail', str)
 			this.$router.push('/detail');
 		},

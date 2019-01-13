@@ -66,8 +66,9 @@ export default {
       })
     }
   },
-  created () {
+  mounted () {
     var str = sessionStorage.getItem("borrowDetail");
+    console.log(str)
     this.material = JSON.parse(str);
 		console.log(this.material)
 		if (this.material.isAgree != 1) {
@@ -91,10 +92,6 @@ export default {
             }
           })
         }
-        this.$axios.get('http://yb.upc.edu.cn:8087/material').then(rsp=>{
-          console.log(rsp.data)
-          this.material = rsp.data
-        })
       })
     }
   }
